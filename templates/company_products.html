@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ company_name }} - Products</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .search-bar {
+            margin-bottom: 20px;
+        }
+        .product-card {
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s; /* Added transition for hover effects */
+        }
+        .product-card:hover {
+            transform: scale(1.05); /* Slightly scale up on hover */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Add shadow effect on hover */
+        }
+        /* Additional style for fixed navbar */
+        .navbar {
+            transition: background-color 0.3s; /* Transition for background color */
+        }
+        .navbar:hover {
+            background-color: #f8f9fa; /* Change background color on hover */
+        }
+        .content {
+            margin-top: 70px; /* Adjust this value based on your navbar height */
+        }
+        .product-card img {
+            height: 200px; /* Fixed height for the images */
+            object-fit: cover; /* Ensures images cover the space while maintaining aspect ratio */
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <a class="navbar-brand" href="{{ url_for('userhome') }}">MyShop</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('select_company') }}">Select Company</a>
+                </li>
+                {% if session.get('user') %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('client_logout', next=request.url) }}">Logout</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('client_login', next=request.url) }}">Login</a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Cart</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+
+    <div class="container content mt-5"> <!-- Added content class -->
+        <h1 class="text-center">{{ company_name }} - Product Listing</h1>
+        <form method="get" action="{{ url_for('company_products', company_name=company_name|replace(' ', '-')|replace('_', '-')) }}" class="search-bar">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="Search for products" name="search" value="{{ request.args.get('search', '') }}">
+                <div class="input-group-append">
+                    <button class="btn btn-primary" type="submit">Search</button>
+                </div>
+            </div>
+        </form>
+        <div class="row">
+            {% for product in products %}
+            <div class="col-md-3 mb-4"> <!-- Changed from col-md-4 to col-md-3 for 4 cards per row -->
+                <div class="card product-card" onclick="window.location.href='{{ url_for('product', product_id=product['_id'], company_name=company_name|replace(' ', '-')|replace('_', '-')) }}'">
+                    <img src="{{ url_for('static', filename='uploads/' + product['image']) }}" class="card-img-top" alt="{{ product['name'] }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product['name'] }}</h5>
+                        <p class="card-text">Price: ₹{{ product['price'] }}</p> <!-- Changed $ to ₹ -->
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
